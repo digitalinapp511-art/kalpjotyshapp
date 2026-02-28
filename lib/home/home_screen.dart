@@ -1,22 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_instance/src/extension_instance.dart';
+import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../Widgets/VoiceSearchBar.dart';
 import '../Widgets/astroProductCard.dart';
 import '../chatScreen/astroInsightsScreen.dart';
 import '../chatScreen/callScreen.dart';
-import '../chatScreen/chatScreen.dart';
+import '../chatScreen/astrochatScreen.dart';
 import '../productViewScreen/productViewScreen.dart';
 import '../pujabooking/pujaBookingScreen.dart';
 import '../userprofileScreen/notificationScreen.dart';
+import 'controllers/banner_controlle.dart';
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
-
+    HomeScreen({super.key});
+  final BannerController bannerController = Get.put(BannerController());
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+
       backgroundColor: const Color(0xFFF3E7DF),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -83,29 +88,29 @@ class HomeScreen extends StatelessWidget {
                     ),
 
                     const SizedBox(height: 18),
-                    VoiceSearchBar(),
-                    // /// SEARCH
-                    // Container(
-                    //   height: 48,
-                    //   padding: const EdgeInsets.symmetric(horizontal: 14),
-                    //   decoration: BoxDecoration(
-                    //     color: Colors.white,
-                    //     borderRadius: BorderRadius.circular(25),
-                    //   ),
-                    //   child: Row(
-                    //     children: [
-                    //       Icon(Icons.search, color: Colors.grey),
-                    //       SizedBox(width: 8),
-                    //       Expanded(
-                    //         child: Text(
-                    //           "Search for “Astrologer”",
-                    //           style: GoogleFonts.montserrat(color: Colors.grey),
-                    //         ),
-                    //       ),
-                    //       Icon(Icons.mic, color: Colors.deepOrange),
-                    //     ],
-                    //   ),
-                    // ),
+
+                    /// SEARCH
+                    Container(
+                      height: 48,
+                      padding: const EdgeInsets.symmetric(horizontal: 14),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.search, color: Colors.grey),
+                          SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              "Search for “Astrologer”",
+                              style: GoogleFonts.montserrat(color: Colors.grey),
+                            ),
+                          ),
+                          Icon(Icons.mic, color: Colors.deepOrange),
+                        ],
+                      ),
+                    ),
 
                     const SizedBox(height: 22),
 
@@ -198,24 +203,51 @@ class HomeScreen extends StatelessWidget {
                     const SizedBox(height: 18),
 
                     /// SLIDER
-                    CarouselSlider(
-                      options: CarouselOptions(
-                        height: 170,
-                        autoPlay: true,
-                        enlargeCenterPage: true,
-                      ),
-                      items: List.generate(
-                        3,
-                        (index) => ClipRRect(
-                          borderRadius: BorderRadius.circular(20),
-                          child: Image.network(
-                            "https://www.astrosage.com/images/software/banner-4-en.jpg",
-                            fit: BoxFit.cover,
-                            width: double.infinity,
-                          ),
+                    /// SLIDER (GetX API BASED)
+                    Obx(() {
+                      if (bannerController.isLoading.value) {
+                        return const SizedBox(
+                          height: 170,
+                          child: Center(child: CircularProgressIndicator()),
+                        );
+                      }
+
+                      return CarouselSlider(
+                        options: CarouselOptions(
+                          height: 170,
+                          autoPlay: true,
+                          enlargeCenterPage: true,
                         ),
-                      ),
-                    ),
+                        items: bannerController.bannerImages.map((imageUrl) {
+                          return ClipRRect(
+                            borderRadius: BorderRadius.circular(20),
+                            child: Image.network(
+                              imageUrl,
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                            ),
+                          );
+                        }).toList(),
+                      );
+                    }),
+                    // CarouselSlider(
+                    //   options: CarouselOptions(
+                    //     height: 170,
+                    //     autoPlay: true,
+                    //     enlargeCenterPage: true,
+                    //   ),
+                    //   items: List.generate(
+                    //     3,
+                    //     (index) => ClipRRect(
+                    //       borderRadius: BorderRadius.circular(20),
+                    //       child: Image.network(
+                    //         "https://www.astrosage.com/images/software/banner-4-en.jpg",
+                    //         fit: BoxFit.cover,
+                    //         width: double.infinity,
+                    //       ),
+                    //     ),
+                    //   ),
+                    // ),
                   ],
                 ),
               ),
@@ -235,7 +267,7 @@ class HomeScreen extends StatelessWidget {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (_) => const ChatScreen(),
+                                  builder: (_) =>   ChatScreen(),
                                 ),
                               );
                             },
@@ -254,7 +286,7 @@ class HomeScreen extends StatelessWidget {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (_) => const CallScreen(),
+                                  builder: (_) =>   CallScreen(),
                                 ),
                               );
                             },
@@ -277,7 +309,7 @@ class HomeScreen extends StatelessWidget {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (_) => const AstroInsightsScreen(),
+                                  builder: (_) =>   AstroInsightsScreen(),
                                 ),
                               );
                             },
@@ -297,7 +329,7 @@ class HomeScreen extends StatelessWidget {
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) =>
-                                      const PujaBookingScreen(),
+                                        PujaBookingScreen(),
                                 ),
                               );
                             },

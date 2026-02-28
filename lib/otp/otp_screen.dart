@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import '../bottomNavigationBar/bottomHomeScreen.dart';
+import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
+import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
+import '../login/controllers/controllers.dart';
 
 class OtpScreen extends StatefulWidget {
   const OtpScreen({super.key});
@@ -9,8 +12,12 @@ class OtpScreen extends StatefulWidget {
 }
 
 class _OtpScreenState extends State<OtpScreen> {
+
+  final AuthController controller = Get.find();
+
   bool isResendEnabled = false;
   int secondsRemaining = 30;
+  String enteredOtp = "";
 
   @override
   void initState() {
@@ -20,6 +27,8 @@ class _OtpScreenState extends State<OtpScreen> {
 
   void startTimer() {
     Future.delayed(const Duration(seconds: 1), () {
+      if (!mounted) return;
+
       if (secondsRemaining > 0) {
         setState(() {
           secondsRemaining--;
@@ -44,10 +53,7 @@ class _OtpScreenState extends State<OtpScreen> {
             height: 280,
             decoration: const BoxDecoration(
               gradient: LinearGradient(
-                colors: [
-                  Color(0xFFFF7A45),
-                  Color(0xFFFF9966),
-                ],
+                colors: [Color(0xFFFF7A45), Color(0xFFFF9966)],
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
               ),
@@ -72,16 +78,13 @@ class _OtpScreenState extends State<OtpScreen> {
 
                     const SizedBox(height: 30),
 
-                    Image.asset(
-                      "assets/logo.png",
-                      height: 80,
-                    ),
+                    Image.asset("assets/logo.png", height: 80),
 
                     const SizedBox(height: 20),
 
-                    const Text(
+                    Text(
                       "OTP Verification 🔐",
-                      style: TextStyle(
+                      style: GoogleFonts.montserrat(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
                       ),
@@ -89,10 +92,10 @@ class _OtpScreenState extends State<OtpScreen> {
 
                     const SizedBox(height: 6),
 
-                    const Text(
+                    Text(
                       "Enter the 6-digit code sent to your mobile",
                       textAlign: TextAlign.center,
-                      style: TextStyle(
+                      style: GoogleFonts.montserrat(
                         fontSize: 13,
                         color: Colors.grey,
                       ),
@@ -100,13 +103,25 @@ class _OtpScreenState extends State<OtpScreen> {
 
                     const SizedBox(height: 30),
 
-                    /// OTP BOXES
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: List.generate(
-                        6,
-                            (index) => _otpBox(),
-                      ),
+                    /// 🔥 OTP FIELD (Correct Way)
+                    OtpTextField(
+                      numberOfFields: 6,
+                      borderColor: const Color(0xFFFF7A45),
+                      focusedBorderColor: const Color(0xFFFF7A45),
+                      showFieldAsBox: true,
+                      borderRadius: BorderRadius.circular(12),
+                      fieldWidth: 45,
+                      fieldHeight: 55,
+                      filled: true,
+                      fillColor: const Color(0xFFF5F6FA),
+                      keyboardType: TextInputType.number,
+                      onCodeChanged: (String code) {
+                        enteredOtp = code;
+                      },
+                      onSubmit: (String otp) {
+                        print("OTP Submitted: $otp");
+                        controller.verifyOTP(otp);   // 🔥 Direct verify here
+                      },
                     ),
 
                     const SizedBox(height: 30),
@@ -115,27 +130,37 @@ class _OtpScreenState extends State<OtpScreen> {
                     SizedBox(
                       width: double.infinity,
                       height: 55,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                              const BottomHomeScreen(),
+                      child: Obx(
+                            () => ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFFF7A45),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
                             ),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFFF7A45),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
                           ),
-                        ),
-                        child: const Text(
-                          "Verify OTP",
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
+                          onPressed: controller.isLoading.value
+                              ? null
+                              : () {
+                            print("Button Pressed");
+                            print("Entered OTP: $enteredOtp");
+
+                            if (enteredOtp.trim().length == 6) {
+                              controller.verifyOTP(enteredOtp.trim());
+                            } else {
+                              Get.snackbar("Error", "Enter complete OTP");
+                            }
+                          },
+                          child: controller.isLoading.value
+                              ? const CircularProgressIndicator(
+                            color: Colors.white,
+                          )
+                              : Text(
+                            "Verify OTP",
+                            style: GoogleFonts.montserrat(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                       ),
@@ -143,26 +168,29 @@ class _OtpScreenState extends State<OtpScreen> {
 
                     const SizedBox(height: 20),
 
-                    /// RESEND OTP WITH TIMER
+                    /// RESEND SECTION
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Text(
+                        Text(
                           "Didn't receive code? ",
-                          style: TextStyle(color: Colors.grey),
+                          style: GoogleFonts.montserrat(
+                            color: Colors.grey,
+                          ),
                         ),
                         isResendEnabled
                             ? GestureDetector(
                           onTap: () {
+                            controller.resendOtp();
                             setState(() {
                               secondsRemaining = 30;
                               isResendEnabled = false;
-                              startTimer();
                             });
+                            startTimer();
                           },
-                          child: const Text(
+                          child: Text(
                             "Resend",
-                            style: TextStyle(
+                            style: GoogleFonts.montserrat(
                               color: Colors.orange,
                               fontWeight: FontWeight.w600,
                             ),
@@ -170,7 +198,7 @@ class _OtpScreenState extends State<OtpScreen> {
                         )
                             : Text(
                           "Resend in $secondsRemaining s",
-                          style: const TextStyle(
+                          style: GoogleFonts.montserrat(
                             color: Colors.grey,
                           ),
                         ),
@@ -184,27 +212,6 @@ class _OtpScreenState extends State<OtpScreen> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  /// OTP BOX DESIGN
-  Widget _otpBox() {
-    return Container(
-      width: 45,
-      height: 55,
-      decoration: BoxDecoration(
-        color: const Color(0xFFF5F6FA),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: const TextField(
-        textAlign: TextAlign.center,
-        keyboardType: TextInputType.number,
-        maxLength: 1,
-        decoration: InputDecoration(
-          counterText: "",
-          border: InputBorder.none,
-        ),
       ),
     );
   }

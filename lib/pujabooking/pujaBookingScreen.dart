@@ -1,77 +1,77 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'controller/pooja_controller.dart';
+import 'model/PoojaModel.dart';
+
 class PujaBookingScreen extends StatelessWidget {
-  const PujaBookingScreen({super.key});
 
-  Future<void> openWhatsApp(String pujaName) async {
-    const String phoneNumber = "919876543210"; // 👈 apna number daale
-    final String message = "Hello, I want to book $pujaName.";
+  final PoojaController controller = Get.put(PoojaController());
 
-    final Uri url = Uri.parse(
-        "https://wa.me/$phoneNumber?text=${Uri.encodeComponent(message)}");
+  PujaBookingScreen({super.key});
 
-    await launchUrl(url, mode: LaunchMode.externalApplication);
+  Future<void> makePhoneCall() async {
+    const String phoneNumber = "tel:+919876543210"; // 👈 apna number
+    final Uri url = Uri.parse(phoneNumber);
+
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       backgroundColor: const Color(0xFFF6F6F6),
       appBar: AppBar(
         title: const Text("Puja Booking"),
         backgroundColor: Colors.orange,
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: const [
-          PujaCard(
-            title: "LAKSHMI PUJA",
-            price: "₹5100/-",
-            image:
-            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR1QZW-AVaIRwuUzT1ARVxTECZcIBIwbTLwnA&s",
-          ),
-          SizedBox(height: 15),
-          PujaCard(
-            title: "Diwali Puja",
-            oldPrice: "₹5100",
-            price: "₹2100/-",
-            image:
-            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ7al09J8wUF_p98wDFp9lM38TDwOJJDeA17Q&s",
-          ),
-        ],
-      ),
+      body: Obx(() {
+
+        if (controller.isLoading.value) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        return ListView.builder(
+          padding: const EdgeInsets.all(16),
+          itemCount: controller.poojaList.length,
+          itemBuilder: (context, index) {
+
+            final PoojaModel pooja =
+            controller.poojaList[index];
+
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 15),
+              child: PujaCard(
+                pooja: pooja,
+                onCall: makePhoneCall,
+              ),
+            );
+          },
+        );
+      }),
     );
   }
 }
 
 class PujaCard extends StatelessWidget {
-  final String title;
-  final String price;
-  final String? oldPrice;
-  final String image;
+
+  final PoojaModel pooja;
+  final VoidCallback onCall;
 
   const PujaCard({
     super.key,
-    required this.title,
-    required this.price,
-    this.oldPrice,
-    required this.image,
+    required this.pooja,
+    required this.onCall,
   });
-
-  Future<void> openWhatsApp(String pujaName) async {
-    const String phoneNumber = "919876543210";
-    final String message = "Hello, I want to book $pujaName.";
-
-    final Uri url = Uri.parse(
-        "https://wa.me/$phoneNumber?text=${Uri.encodeComponent(message)}");
-
-    await launchUrl(url, mode: LaunchMode.externalApplication);
-  }
 
   @override
   Widget build(BuildContext context) {
+
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(15),
@@ -84,72 +84,66 @@ class PujaCard extends StatelessWidget {
 
           /// Image
           ClipRRect(
-            borderRadius: const BorderRadius.vertical(
-              top: Radius.circular(15),
-            ),
-            child: Image.network(
-              image,
+            borderRadius:
+            const BorderRadius.vertical(top: Radius.circular(15)),
+            child: pooja.image != null
+                ? Image.network(
+              pooja.image!,
               height: 180,
               width: double.infinity,
               fit: BoxFit.cover,
+            )
+                : Container(
+              height: 180,
+              color: Colors.grey.shade200,
+              child: const Center(child: Icon(Icons.image)),
             ),
           ),
 
           Padding(
             padding: const EdgeInsets.all(12),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment:
+              MainAxisAlignment.spaceBetween,
               children: [
 
                 /// Title + Price
                 Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment:
+                  CrossAxisAlignment.start,
                   children: [
                     Text(
-                      title,
-                      style:   GoogleFonts.montserrat(
+                      pooja.name,
+                      style: GoogleFonts.montserrat(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
                       ),
                     ),
                     const SizedBox(height: 6),
-                    Row(
-                      children: [
-                        if (oldPrice != null)
-                          Text(
-                            oldPrice!,
-                            style:   GoogleFonts.montserrat(
-                              decoration: TextDecoration.lineThrough,
-                              color: Colors.grey,
-                            ),
-                          ),
-                        if (oldPrice != null)
-                          const SizedBox(width: 6),
-                        Text(
-                          price,
-                          style:   GoogleFonts.montserrat(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
+                    Text(
+                      "₹ ${pooja.price}",
+                      style: GoogleFonts.montserrat(
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ],
                 ),
 
-                /// Book Button
+                /// Call Button
                 OutlinedButton(
                   style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Colors.orange),
+                    side: const BorderSide(
+                        color: Colors.orange),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius:
+                      BorderRadius.circular(12),
                     ),
                   ),
-                  onPressed: () {
-                    openWhatsApp(title);
-                  },
-                  child:   Text(
-                    "Book Now",
-                    style: GoogleFonts.montserrat(color: Colors.orange),
+                  onPressed: onCall,
+                  child: Text(
+                    "Call Now",
+                    style: GoogleFonts.montserrat(
+                        color: Colors.orange),
                   ),
                 )
               ],

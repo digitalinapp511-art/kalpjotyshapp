@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../astrologerProfileScreen/astroprofile.dart';
+import 'call_screen.dart';
+import 'controllers/astro_controller.dart';
+import 'models/astro_model.dart';
 
 class CallScreen extends StatelessWidget {
-  const CallScreen({super.key});
+
+  CallScreen({super.key});
+
+  final AstroController controller = Get.put(AstroController());
 
   @override
   Widget build(BuildContext context) {
@@ -18,12 +25,6 @@ class CallScreen extends StatelessWidget {
           "Call",
           style: TextStyle(color: Colors.black),
         ),
-        actions: const [
-          Padding(
-            padding: EdgeInsets.only(right: 16),
-            child: Icon(Icons.tune, color: Colors.black),
-          )
-        ],
       ),
       body: Column(
         children: [
@@ -38,8 +39,8 @@ class CallScreen extends StatelessWidget {
                 color: const Color(0xFFFFEFE7),
                 borderRadius: BorderRadius.circular(30),
               ),
-              child: Row(
-                children: const [
+              child: const Row(
+                children: [
                   Icon(Icons.search, color: Colors.grey),
                   SizedBox(width: 8),
                   Expanded(
@@ -75,15 +76,26 @@ class CallScreen extends StatelessWidget {
 
           const SizedBox(height: 15),
 
-          /// 👤 Astrologer Card
+          /// 👤 Astrologer List
           Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: 10, // 👈 yaha 2 set karo
-              itemBuilder: (context, index) {
-                return const AstrologerCard();
-              },
-            ),
+            child: Obx(() {
+              if (controller.isLoading.value) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
+              if (controller.astroList.isEmpty) {
+                return const Center(child: Text("No Astrologer Found"));
+              }
+
+              return ListView.builder(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                itemCount: controller.astroList.length,
+                itemBuilder: (context, index) {
+                  final astro = controller.astroList[index];
+                  return AstrologerCard(astro: astro);
+                },
+              );
+            }),
           )
         ],
       ),
@@ -92,7 +104,7 @@ class CallScreen extends StatelessWidget {
 
   static Widget _buildChip(String text, bool isSelected) {
     return Container(
-      margin:   EdgeInsets.only(right: 10),
+      margin: const EdgeInsets.only(right: 10),
       child: ChoiceChip(
         label: Text(text),
         selected: isSelected,
@@ -107,9 +119,11 @@ class CallScreen extends StatelessWidget {
   }
 }
 
-/// 🔥 Astrologer Card Widget
+/// 🔥 Astrologer Card Widget (Dynamic)
 class AstrologerCard extends StatelessWidget {
-  const AstrologerCard({super.key});
+  final AstroModel astro;
+
+  const AstrologerCard({super.key, required this.astro});
 
   @override
   Widget build(BuildContext context) {
@@ -126,84 +140,80 @@ class AstrologerCard extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              /// Profile Image with Border
+              /// Profile Image
               Container(
                 padding: const EdgeInsets.all(2),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(color: Colors.deepOrange),
                 ),
-                child: const CircleAvatar(
+                child: CircleAvatar(
                   radius: 35,
-                  backgroundImage:
-                  NetworkImage("https://i.pravatar.cc/150?img=5"),
+                  backgroundImage: astro.profilePhoto != null
+                      ? NetworkImage(astro.profilePhoto!)
+                      : const NetworkImage(
+                      "https://i.pravatar.cc/150?img=5"),
                 ),
               ),
 
               const SizedBox(width: 12),
 
-              /// Details
+              /// Details (Profile Open)
               Expanded(
                 child: InkWell(
-                  onTap: (){
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const AstroProfileScreen(),
-                      ),
-                    );
+                  onTap: () {
+                    Get.to(() => const AstroProfileScreen());
                   },
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
-                        children:   [
-                          Text(
-                            "Sidhi",
-                            style: GoogleFonts.montserrat(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              astro.name,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: GoogleFonts.montserrat(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
                             ),
                           ),
-                          SizedBox(width: 5),
-                          Icon(Icons.verified,
+                          const SizedBox(width: 5),
+                          const Icon(Icons.verified,
                               color: Colors.green, size: 16),
                         ],
                       ),
                       const SizedBox(height: 4),
-                        Text("Vedic, Vastu, Prashana",
-                          style: GoogleFonts.montserrat(color: Colors.grey)),
+
+                      Text(
+                        astro.skills.join(", "),
+                        style: GoogleFonts.montserrat(color: Colors.grey),
+                      ),
+
                       const SizedBox(height: 2),
-                        Text("English, Hindi",
-                          style: GoogleFonts.montserrat(color: Colors.grey)),
-                      const SizedBox(height: 2),
-                        Text("Exp : 12 Years",
-                          style: GoogleFonts.montserrat(color: Colors.grey)),
+
+                      Text(
+                        "Exp : ${astro.experience}",
+                        style: GoogleFonts.montserrat(color: Colors.grey),
+                      ),
 
                       const SizedBox(height: 6),
 
-                      /// Rating + Price Row
                       Row(
                         children: [
                           const Icon(Icons.star,
                               color: Colors.orange, size: 16),
                           const SizedBox(width: 3),
-                            Text("4.96",
-                              style: GoogleFonts.montserrat(
-                                  fontWeight: FontWeight.w500)),
-
-                          const Spacer(),
-
-                            Text(
-                            "₹ 50/min",
+                          Text(
+                            "4.9",
                             style: GoogleFonts.montserrat(
-                              color: Colors.grey,
-                              decoration: TextDecoration.lineThrough,
-                            ),
+                                fontWeight: FontWeight.w500),
                           ),
-                          const SizedBox(width: 5),
-                            Text(
-                            "27/min",
+                          const Spacer(),
+                          Text(
+                            "₹ 30/min",
                             style: GoogleFonts.montserrat(
                               fontWeight: FontWeight.bold,
                             ),
@@ -218,21 +228,51 @@ class AstrologerCard extends StatelessWidget {
               const SizedBox(width: 10),
 
               /// Call Button
-              OutlinedButton(
-                style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: Colors.green),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
+              Column(
+                children: [
+                  OutlinedButton(
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: Colors.green),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                    onPressed: () {
+                      Get.snackbar(
+                        "Calling",
+                        "Calling ${astro.name}...",
+                      );
+                      Get.to(() => const CallUIScreen(isVideoCall: false));
+                    },
+                    child: Text(
+                      "Audio Call",
+                      style: GoogleFonts.montserrat(color: Colors.green),
+                    ),
                   ),
-                ),
-                onPressed: () {
-
-                },
-                child:   Text(
-                  "Call",
-                  style: GoogleFonts.montserrat(color: Colors.green),
-                ),
+                  /// Call Button
+                  OutlinedButton(
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: Colors.green),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                    onPressed: () {
+                      Get.snackbar(
+                        "Calling",
+                        "Calling ${astro.name}...",
+                      );
+                      Get.to(() => const CallUIScreen(isVideoCall: true));
+                    },
+                    child: Text(
+                      "Video Call",
+                      style: GoogleFonts.montserrat(color: Colors.green),
+                    ),
+                  )
+                ],
               )
+              ,
+
             ],
           ),
 
@@ -250,7 +290,7 @@ class AstrologerCard extends StatelessWidget {
                   bottomRight: Radius.circular(10),
                 ),
               ),
-              child:   Text(
+              child: Text(
                 "Top Rated",
                 style: GoogleFonts.montserrat(
                   fontSize: 10,

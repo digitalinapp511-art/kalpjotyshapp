@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "5986978124",
+    "project_id": "kalpjyotish-bd41d",
+    "storage_bucket": "kalpjyotish-bd41d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:5986978124:android:c3d2fb3dc2c2a49382e7e9",
+        "android_client_info": {
+          "package_name": "com.kalpjyotish.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "5986978124-526v536t0rm7lg0roh90btbe3nvunt0c.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBYgESKjGLvd53-0lZ98jIBqlR2mXqEPIE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "5986978124-526v536t0rm7lg0roh90btbe3nvunt0c.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "5986978124-61ir0q7kc35o8ahb38fl6ukj0bmheicq.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.untitled"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

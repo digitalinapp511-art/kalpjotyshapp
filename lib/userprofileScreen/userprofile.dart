@@ -1,32 +1,41 @@
 import 'package:flutter/material.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_instance/src/extension_instance.dart';
+import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'bookingHistoryScreen.dart';
+import 'controller/profile_controller.dart';
 import 'helpSupportScreen.dart';
 import 'notificationScreen.dart';
 
+import 'dart:io';
+
 class UserProfileScreen extends StatelessWidget {
-  const UserProfileScreen({super.key});
+  UserProfileScreen({super.key});
+
+  final ProfileController controller = Get.put(ProfileController());
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF4F6FA),
       body: SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
         child: Column(
           children: [
-
             /// 🔥 HEADER SECTION
             Container(
               width: double.infinity,
               padding: const EdgeInsets.only(
-                  top: 60, bottom: 30, left: 20, right: 20),
+                top: 60,
+                bottom: 30,
+                left: 20,
+                right: 20,
+              ),
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [
-                    Color(0xFFFF7A45),
-                    Color(0xFFFF9966),
-                  ],
+                  colors: [Color(0xFFFF7A45), Color(0xFFFF9966)],
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                 ),
@@ -36,32 +45,41 @@ class UserProfileScreen extends StatelessWidget {
               ),
               child: Column(
                 children: [
-
                   /// Profile Image
-                  const CircleAvatar(
-                    radius: 50,
-                    backgroundImage:
-                    NetworkImage("https://i.pravatar.cc/150?img=32"),
+                  Obx(
+                    () => CircleAvatar(
+                      radius: 50,
+                      backgroundImage: controller.imagePath.value.isNotEmpty
+                          ? FileImage(File(controller.imagePath.value))
+                          : const NetworkImage(
+                                  "https://i.pravatar.cc/150?img=32",
+                                )
+                                as ImageProvider,
+                    ),
                   ),
 
                   const SizedBox(height: 14),
 
-                  const Text(
-                    "Ravi Sharma",
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                  Obx(
+                    () => Text(
+                      controller.name.value,
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
 
                   const SizedBox(height: 4),
 
-                  const Text(
-                    "ravi@gmail.com",
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: 14,
+                  Obx(
+                    () => Text(
+                      controller.email.value,
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 14,
+                      ),
                     ),
                   ),
 
@@ -70,7 +88,9 @@ class UserProfileScreen extends StatelessWidget {
                   /// Membership Badge
                   Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 14, vertical: 6),
+                      horizontal: 14,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.2),
                       borderRadius: BorderRadius.circular(20),
@@ -78,8 +98,24 @@ class UserProfileScreen extends StatelessWidget {
                     child: const Text(
                       "🔥 Gold Member",
                       style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600),
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+
+                  TextButton(
+                    onPressed: () {
+                      showEditProfileSheet(context);
+                    },
+                    child: Text(
+                      "Edit Profile",
+                      style: GoogleFonts.montserrat(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                        decoration: TextDecoration.underline,
+                      ),
                     ),
                   ),
                 ],
@@ -101,12 +137,11 @@ class UserProfileScreen extends StatelessWidget {
                       color: Colors.black.withOpacity(0.05),
                       blurRadius: 10,
                       offset: const Offset(0, 5),
-                    )
+                    ),
                   ],
                 ),
                 child: Column(
                   children: [
-
                     /// 🔥 Top Row
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -117,14 +152,17 @@ class UserProfileScreen extends StatelessWidget {
                             Text(
                               "Wallet Balance",
                               style: TextStyle(
-                                  fontSize: 14, color: Colors.grey),
+                                fontSize: 14,
+                                color: Colors.grey,
+                              ),
                             ),
                             SizedBox(height: 5),
                             Text(
                               "₹ 2,450",
                               style: TextStyle(
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.bold),
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ],
                         ),
@@ -132,7 +170,7 @@ class UserProfileScreen extends StatelessWidget {
                           Icons.account_balance_wallet,
                           color: Colors.orange,
                           size: 32,
-                        )
+                        ),
                       ],
                     ),
 
@@ -143,16 +181,15 @@ class UserProfileScreen extends StatelessWidget {
                       width: double.infinity,
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          padding:
-                          const EdgeInsets.symmetric(vertical: 14),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
-                            borderRadius:
-                            BorderRadius.circular(14),
+                            borderRadius: BorderRadius.circular(14),
                           ),
                           backgroundColor: Colors.orange,
                         ),
                         onPressed: () {
                           showWalletRechargeSheet(context);
+
                           /// 👉 Yaha Recharge Screen pe navigate karo
                           // Navigator.push(
                           //   context,
@@ -161,14 +198,15 @@ class UserProfileScreen extends StatelessWidget {
                           //   ),
                           // );
                         },
-                        child:   Text(
+                        child: Text(
                           "Add Money",
                           style: GoogleFonts.montserrat(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600),
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
-                    )
+                    ),
                   ],
                 ),
               ),
@@ -180,14 +218,11 @@ class UserProfileScreen extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Column(
-                children:   [
-
-
-
+                children: [
                   ProfileTile(
                     icon: Icons.history,
                     title: "Booking History",
-                    onTap: (){
+                    onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -200,7 +235,7 @@ class UserProfileScreen extends StatelessWidget {
                   ProfileTile(
                     icon: Icons.notifications_none,
                     title: "Notifications",
-                    onTap: (){
+                    onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -210,11 +245,10 @@ class UserProfileScreen extends StatelessWidget {
                     },
                   ),
 
-
                   ProfileTile(
                     icon: Icons.help_outline,
                     title: "Help & Support",
-                    onTap: (){
+                    onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -230,7 +264,7 @@ class UserProfileScreen extends StatelessWidget {
                     icon: Icons.logout,
                     title: "Logout",
                     isLogout: true,
-                    onTap: (){
+                    onTap: () {
                       showLogoutDialog(context);
                     },
                   ),
@@ -245,16 +279,15 @@ class UserProfileScreen extends StatelessWidget {
     );
   }
 }
+
 void showWalletRechargeSheet(BuildContext context) {
-  final TextEditingController amountController =
-  TextEditingController();
+  final TextEditingController amountController = TextEditingController();
 
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
     shape: const RoundedRectangleBorder(
-      borderRadius:
-      BorderRadius.vertical(top: Radius.circular(30)),
+      borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
     ),
     builder: (context) {
       return Padding(
@@ -262,13 +295,11 @@ void showWalletRechargeSheet(BuildContext context) {
           left: 20,
           right: 20,
           top: 25,
-          bottom:
-          MediaQuery.of(context).viewInsets.bottom + 25,
+          bottom: MediaQuery.of(context).viewInsets.bottom + 25,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-
             /// 🔥 Top Drag Line
             Container(
               width: 40,
@@ -281,7 +312,7 @@ void showWalletRechargeSheet(BuildContext context) {
 
             const SizedBox(height: 20),
 
-              Text(
+            Text(
               "Recharge Wallet",
               style: GoogleFonts.montserrat(
                 fontSize: 18,
@@ -315,8 +346,7 @@ void showWalletRechargeSheet(BuildContext context) {
                 filled: true,
                 fillColor: const Color(0xFFF4F6FA),
                 border: OutlineInputBorder(
-                  borderRadius:
-                  BorderRadius.circular(15),
+                  borderRadius: BorderRadius.circular(15),
                   borderSide: BorderSide.none,
                 ),
               ),
@@ -329,17 +359,14 @@ void showWalletRechargeSheet(BuildContext context) {
               width: double.infinity,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  padding:
-                  const EdgeInsets.symmetric(vertical: 14),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
                   backgroundColor: Colors.orange,
                   shape: RoundedRectangleBorder(
-                    borderRadius:
-                    BorderRadius.circular(15),
+                    borderRadius: BorderRadius.circular(15),
                   ),
                 ),
                 onPressed: () {
-                  String amount =
-                  amountController.text.trim();
+                  String amount = amountController.text.trim();
 
                   if (amount.isEmpty) return;
 
@@ -348,14 +375,15 @@ void showWalletRechargeSheet(BuildContext context) {
                   /// 👉 Yaha Payment Gateway integrate karna
                   /// Razorpay / PhonePe / UPI
                 },
-                child:   Text(
+                child: Text(
                   "Proceed to Pay",
                   style: GoogleFonts.montserrat(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600),
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
-            )
+            ),
           ],
         ),
       );
@@ -364,53 +392,204 @@ void showWalletRechargeSheet(BuildContext context) {
 }
 
 /// 🔥 Quick Amount Chip Widget
-Widget rechargeChip(
-    TextEditingController controller, String amount) {
+Widget rechargeChip(TextEditingController controller, String amount) {
   return GestureDetector(
     onTap: () {
       controller.text = amount;
     },
     child: Container(
-      padding: const EdgeInsets.symmetric(
-          horizontal: 18, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
       decoration: BoxDecoration(
         color: Colors.orange.withOpacity(0.1),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
         "₹ $amount",
-        style:   GoogleFonts.montserrat(
-            color: Colors.orange,
-            fontWeight: FontWeight.w600),
+        style: GoogleFonts.montserrat(
+          color: Colors.orange,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     ),
   );
 }
+
+void showEditProfileSheet(BuildContext context) {
+  final ProfileController controller = Get.find();
+
+  final TextEditingController nameController = TextEditingController(
+    text: controller.name.value,
+  );
+
+  final TextEditingController emailController = TextEditingController(
+    text: controller.email.value,
+  );
+
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+    ),
+    builder: (context) {
+      return Padding(
+        padding: EdgeInsets.only(
+          left: 20,
+          right: 20,
+          top: 25,
+          bottom: MediaQuery.of(context).viewInsets.bottom + 25,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            /// Drag Line
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade300,
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            Text(
+              "Edit Profile",
+              style: GoogleFonts.montserrat(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            /// Profile Image
+            /// 🔥 Editable Image
+            Obx(
+              () => Stack(
+                children: [
+                  CircleAvatar(
+                    radius: 45,
+                    backgroundImage: controller.imagePath.value.isNotEmpty
+                        ? FileImage(File(controller.imagePath.value))
+                        : const NetworkImage("https://i.pravatar.cc/150?img=32")
+                              as ImageProvider,
+                  ),
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: GestureDetector(
+                      onTap: controller.pickImage,
+                      child: Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: const BoxDecoration(
+                          color: Colors.orange,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.edit,
+                          color: Colors.white,
+                          size: 16,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            /// Name Field
+            TextField(
+              controller: nameController,
+              decoration: InputDecoration(
+                labelText: "Full Name",
+                filled: true,
+                fillColor: const Color(0xFFF4F6FA),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(15),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 15),
+
+            /// Email Field
+            TextField(
+              controller: emailController,
+              decoration: InputDecoration(
+                labelText: "Email",
+                filled: true,
+                fillColor: const Color(0xFFF4F6FA),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(15),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 25),
+
+            /// Save Button
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  backgroundColor: Colors.orange,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                ),
+                onPressed: () {
+                  String name = nameController.text.trim();
+                  String email = emailController.text.trim();
+
+                  if (name.isEmpty || email.isEmpty) {
+                    return;
+                  }
+
+                  Navigator.pop(context);
+
+                  /// 👉 Yaha API call karke profile update karna
+                },
+                child: Text(
+                  "Save Changes",
+                  style: GoogleFonts.montserrat(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    },
+  );
+}
+
 void showLogoutDialog(BuildContext context) {
   showDialog(
     context: context,
     barrierDismissible: false,
     builder: (context) {
       return Dialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(25),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
         child: Padding(
-          padding: const EdgeInsets.symmetric(
-              horizontal: 24, vertical: 30),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 30),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-
               /// 🔥 Logo
-              Image.asset(
-                "assets/logo.png",
-                height: 70,
-              ),
+              Image.asset("assets/logo.png", height: 70),
 
               const SizedBox(height: 20),
 
-                Text(
+              Text(
                 "Logout",
                 style: GoogleFonts.montserrat(
                   fontSize: 20,
@@ -420,7 +599,7 @@ void showLogoutDialog(BuildContext context) {
 
               const SizedBox(height: 10),
 
-                Text(
+              Text(
                 "Are you sure you want to logout from your account?",
                 textAlign: TextAlign.center,
                 style: GoogleFonts.montserrat(color: Colors.grey),
@@ -430,14 +609,12 @@ void showLogoutDialog(BuildContext context) {
 
               Row(
                 children: [
-
                   /// Cancel Button
                   Expanded(
                     child: OutlinedButton(
                       style: OutlinedButton.styleFrom(
                         shape: RoundedRectangleBorder(
-                          borderRadius:
-                          BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(12),
                         ),
                       ),
                       onPressed: () {
@@ -455,8 +632,7 @@ void showLogoutDialog(BuildContext context) {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.red,
                         shape: RoundedRectangleBorder(
-                          borderRadius:
-                          BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(12),
                         ),
                       ),
                       onPressed: () {
@@ -474,7 +650,7 @@ void showLogoutDialog(BuildContext context) {
                     ),
                   ),
                 ],
-              )
+              ),
             ],
           ),
         ),
@@ -482,6 +658,7 @@ void showLogoutDialog(BuildContext context) {
     },
   );
 }
+
 /// 🔥 Menu Tile
 class ProfileTile extends StatelessWidget {
   final IconData icon;
@@ -493,7 +670,8 @@ class ProfileTile extends StatelessWidget {
     super.key,
     required this.icon,
     required this.title,
-    this.isLogout = false, required this.onTap,
+    this.isLogout = false,
+    required this.onTap,
   });
 
   @override
@@ -508,16 +686,12 @@ class ProfileTile extends StatelessWidget {
             color: Colors.black.withOpacity(0.03),
             blurRadius: 8,
             offset: const Offset(0, 4),
-          )
+          ),
         ],
       ),
       child: ListTile(
-        contentPadding:
-        const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
-        leading: Icon(
-          icon,
-          color: isLogout ? Colors.red : Colors.black87,
-        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+        leading: Icon(icon, color: isLogout ? Colors.red : Colors.black87),
         title: Text(
           title,
           style: GoogleFonts.montserrat(

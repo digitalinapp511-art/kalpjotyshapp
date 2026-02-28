@@ -1,26 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_instance/src/extension_instance.dart';
+import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../otp/otp_screen.dart';
+import 'controllers/controllers.dart';
 
 class LoginScreen extends StatelessWidget {
-  const LoginScreen({super.key});
+  LoginScreen({super.key});
+
+  final AuthController controller = Get.put(AuthController());
+  final TextEditingController phoneController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
         children: [
-
           /// 🔥 TOP GRADIENT
           Container(
             height: 300,
             decoration: const BoxDecoration(
               gradient: LinearGradient(
-                colors: [
-                  Color(0xFFFF7A45),
-                  Color(0xFFFF9966),
-                ],
+                colors: [Color(0xFFFF7A45), Color(0xFFFF9966)],
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
               ),
@@ -35,21 +38,15 @@ class LoginScreen extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 24),
               decoration: const BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.vertical(
-                  top: Radius.circular(30),
-                ),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
               ),
               child: SingleChildScrollView(
                 child: Column(
                   children: [
-
                     const SizedBox(height: 30),
 
                     /// LOGO
-                    Image.asset(
-                      "assets/logo.png",
-                      height: 90,
-                    ),
+                    Image.asset("assets/logo.png", height: 90),
 
                     const SizedBox(height: 20),
 
@@ -76,6 +73,7 @@ class LoginScreen extends StatelessWidget {
 
                     /// MOBILE FIELD
                     TextField(
+                      controller: phoneController,
                       keyboardType: TextInputType.phone,
                       decoration: InputDecoration(
                         hintText: "Enter Mobile Number",
@@ -95,21 +93,28 @@ class LoginScreen extends StatelessWidget {
                     SizedBox(
                       width: double.infinity,
                       height: 55,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.push( context, MaterialPageRoute( builder: (context) => const OtpScreen(), ), );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFFF7A45),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                        ),
-                        child: const Text(
-                          "Continue",
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
+                      child: Obx(
+                        () => ElevatedButton(
+                          onPressed: controller.isLoading.value
+                              ? null
+                              : () => controller.sendOTP(
+                                  phoneController.text.trim(),
+                                ),
+                          child: controller.isLoading.value
+                              ? CircularProgressIndicator(color: Colors.white)
+                              : Text(
+                                  "Continue",
+                                  style: GoogleFonts.montserrat(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFFF7A45),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
                           ),
                         ),
                       ),
@@ -119,9 +124,14 @@ class LoginScreen extends StatelessWidget {
 
                     /// GOOGLE BUTTON
                     OutlinedButton.icon(
-                      onPressed: () {},
+                      onPressed: () {
+                        Get.find<AuthController>().signInWithGoogle();
+                      },
                       icon: const Icon(Icons.g_mobiledata, size: 26),
-                      label: const Text("Continue with Google"),
+                      label: Text(
+                        "Continue with Google",
+                        style: GoogleFonts.montserrat(),
+                      ),
                       style: OutlinedButton.styleFrom(
                         minimumSize: const Size(double.infinity, 55),
                         shape: RoundedRectangleBorder(

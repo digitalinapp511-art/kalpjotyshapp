@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:hugeicons/hugeicons.dart';
 class CustomBottomNavBar extends StatelessWidget {
   final int currentIndex;
   final Function(int) onTap;
@@ -35,19 +35,35 @@ class CustomBottomNavBar extends StatelessWidget {
           unselectedItemColor: Colors.grey,
           items: const [
             BottomNavigationBarItem(
-              icon: Icon(Icons.home_outlined),
+              icon: HugeIcon(
+                icon: HugeIcons.strokeRoundedHome01,
+                color: Colors.red,
+                size: 30.0,
+              ),
               label: "Home",
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.chat_outlined),
+              icon:HugeIcon(
+                icon: HugeIcons.strokeRoundedBubbleChatOutcome,
+                color: Colors.red,
+                size: 30.0,
+              ),
               label: "Chat",
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.call_outlined),
+              icon: HugeIcon(
+                icon: HugeIcons.strokeRoundedCalling,
+                color: Colors.red,
+                size: 30.0,
+              ),
               label: "Call",
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.person_outline),
+              icon: HugeIcon(
+                icon: HugeIcons.strokeRoundedUser,
+                color: Colors.red,
+                size: 30.0,
+              ),
               label: "Profile",
             ),
           ],

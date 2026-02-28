@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_navigation/src/extension_navigation.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:async';
 
+import 'bottomNavigationBar/bottomHomeScreen.dart';
 import 'login/login_screen.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -13,7 +17,7 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
-
+  final box = GetStorage();
   late AnimationController _controller;
   late Animation<double> _fadeAnimation;
   late Animation<double> _scaleAnimation;
@@ -21,7 +25,7 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   void initState() {
     super.initState();
-
+    checkLogin();
     // Animation controller (Duration: 2 seconds)
     _controller = AnimationController(
       vsync: this,
@@ -43,7 +47,7 @@ class _SplashScreenState extends State<SplashScreen>
     Timer(const Duration(seconds: 15), () {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => const LoginScreen()),
+        MaterialPageRoute(builder: (_) =>   LoginScreen()),
       );
     });
   }
@@ -54,7 +58,17 @@ class _SplashScreenState extends State<SplashScreen>
     _controller.dispose();
     super.dispose();
   }
+  void checkLogin() async {
+    await Future.delayed(Duration(seconds: 2));
 
+    String? token = box.read("token");
+
+    if (token != null && token.isNotEmpty) {
+      Get.offAll(() => BottomHomeScreen());
+    } else {
+      Get.offAll(() => LoginScreen());
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
