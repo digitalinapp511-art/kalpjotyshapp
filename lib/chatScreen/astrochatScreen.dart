@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'ChatUIScreen.dart';
-import 'callScreen.dart';
-import 'call_screen.dart';
 import 'controllers/astro_controller.dart';
 import 'models/astro_model.dart';
 
